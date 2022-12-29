@@ -1,5 +1,5 @@
 // DOCUMENT QUERIES
-const gameBoardElem = document.querySelector('.game-board');
+const innerBoardElem = document.querySelector('.inner-board')
 // END DOCUMENT QUERIES
 
 // DATA STRUCTURES
@@ -11,27 +11,59 @@ let gameBoard = ((board) => {
     ['', '', ''],
     ['', '', ''],
     ['', '', ''],
-  ];
+  ]
 
-  let currentTurn = 'X';
+  let playerChoice = 'X'
+  let currentTurn = 'X'
+  let gameOver = false
 
   // display the board based on the state
-  function display() {}
+  function refreshDisplay() {
+    innerBoardElem.replaceChildren()
+    for (let rowIndex = 0; rowIndex < state.length; rowIndex++) {
+      let rowState = state[rowIndex]
+      for (let colIndex = 0; colIndex < rowState.length; colIndex++) {
+        let squareState = rowState[colIndex]
+        let squareElem = document.createElement('div')
+        if (squareState === 'X') {
+          squareElem.classList.add('x-piece')
+        }
+        if (squareState === 'O') {
+          squareElem.classList.add('o-piece')
+        }
+        board.appendChild(squareElem)
+      }
+    }
+  }
 
   // place a piece
-  function placePiece() {}
+  function placePiece() {
+    refreshDisplay()
+  }
 
   // remove all pieces from the board
   function reset() {}
 
   // determine if the game has ended
-  function gameEnd() {}
+  function gameEnd() {
+    // row checks
+    for (let rowIndex = 0; rowIndex < state.length; rowIndex++) {
+      let row = state[rowIndex]
+      if (row.every((val) => val === 'X') || row.every((val) => val === 'O')) {
+        gameOver = true
+        return
+      }
+    }
+    // column checks
+
+    // diagonal checks
+  }
 
   return {
     reset,
     placePiece,
-  };
-})(gameBoardElem);
+  }
+})(innerBoardElem)
 // END GLOBAL STATE
 
 // SET UP DOM
@@ -40,4 +72,4 @@ let gameBoard = ((board) => {
 // DOM MANIPULATION FUNCTIONS
 // END DOM MANIPULATION FUNCTIONS
 
-(function main() {})();
+;(function main() {})()
