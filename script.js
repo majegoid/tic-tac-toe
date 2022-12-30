@@ -27,7 +27,9 @@ const gameBoard = ((board) => {
       typeof +col === 'number' &&
       !Number.isNaN(+col)
     ) {
-      state[row][col] = piece;
+      if (state[row][col] !== 'X' && state[row][col] !== 'O') {
+        state[row][col] = piece;
+      }
     }
     refreshDisplay();
   }
@@ -98,12 +100,14 @@ const gameStateController = ((gameBoard) => {
       // row checks
       if (row.every((val) => val === playerPiece)) {
         console.log(`row #${i} check is met`);
+        winningPlayer = currentPlayer;
         gameOver = true;
         return;
       }
       // column checks
       if (column.every((val) => val === playerPiece)) {
         console.log(`col #${i} check is met`);
+        winningPlayer = currentPlayer;
         gameOver = true;
         return;
       }
@@ -115,6 +119,7 @@ const gameStateController = ((gameBoard) => {
       gameBoardState[2][2] === playerPiece
     ) {
       console.log(`top-left bottom-right diagonal check is met`);
+      winningPlayer = currentPlayer;
       gameOver = true;
       return;
     }
@@ -124,6 +129,7 @@ const gameStateController = ((gameBoard) => {
       gameBoardState[0][2] === playerPiece
     ) {
       console.log(`top-left bottom-right diagonal check is met`);
+      winningPlayer = currentPlayer;
       gameOver = true;
       return;
     }
