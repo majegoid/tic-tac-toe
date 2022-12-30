@@ -1,75 +1,166 @@
-// DOCUMENT QUERIES
-const innerBoardElem = document.querySelector('.inner-board')
-// END DOCUMENT QUERIES
+const innerBoardElem = document.querySelector('.inner-board');
 
-// DATA STRUCTURES
-// END DATA STRUCTURES
-
-// GLOBAL STATE
-let gameBoard = ((board) => {
+const gameBoard = ((board) => {
   let state = [
     ['', '', ''],
     ['', '', ''],
     ['', '', ''],
-  ]
+  ];
 
-  let playerChoice = 'X'
-  let currentTurn = 'X'
-  let gameOver = false
-
-  // display the board based on the state
-  function refreshDisplay() {
-    innerBoardElem.replaceChildren()
-    for (let rowIndex = 0; rowIndex < state.length; rowIndex++) {
-      let rowState = state[rowIndex]
-      for (let colIndex = 0; colIndex < rowState.length; colIndex++) {
-        let squareState = rowState[colIndex]
-        let squareElem = document.createElement('div')
-        if (squareState === 'X') {
-          squareElem.classList.add('x-piece')
-        }
-        if (squareState === 'O') {
-          squareElem.classList.add('o-piece')
-        }
-        board.appendChild(squareElem)
+  function getState() {
+    let stateCopy = [];
+    for (const row of state) {
+      let rowCopy = [];
+      for (const val of row) {
+        rowCopy.push(val);
       }
+      stateCopy.push(rowCopy);
     }
+    return stateCopy;
   }
 
   // place a piece
-  function placePiece() {
-    refreshDisplay()
+  function placePiece(row, col, piece) {
+    if (
+      typeof +row === 'number' &&
+      !Number.isNaN(+row) &&
+      typeof +col === 'number' &&
+      !Number.isNaN(+col)
+    ) {
+      state[row][col] = piece;
+    }
+    refreshDisplay();
+  }
+
+  // display the board based on the state
+  function refreshDisplay() {
+    board.replaceChildren();
+    for (let rowIndex = 0; rowIndex < state.length; rowIndex++) {
+      let rowState = state[rowIndex];
+      for (let colIndex = 0; colIndex < rowState.length; colIndex++) {
+        let squareState = rowState[colIndex];
+        let squareElem = document.createElement('div');
+        squareElem.setAttribute('data-row', rowIndex);
+        squareElem.setAttribute('data-col', colIndex);
+        if (squareState === 'X') {
+          squareElem.classList.add('x-piece');
+        }
+        if (squareState === 'O') {
+          squareElem.classList.add('o-piece');
+        }
+        board.appendChild(squareElem);
+      }
+    }
   }
 
   // remove all pieces from the board
-  function reset() {}
+  function reset() {
+    state = [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+    ];
+    refreshDisplay();
+  }
 
-  // determine if the game has ended
-  function gameEnd() {
-    // row checks
-    for (let rowIndex = 0; rowIndex < state.length; rowIndex++) {
-      let row = state[rowIndex]
-      if (row.every((val) => val === 'X') || row.every((val) => val === 'O')) {
-        gameOver = true
-        return
+  return { getState, refreshDisplay, placePiece, reset };
+})(innerBoardElem);
+
+const gameStateController = ((gameBoard) => {
+  let winningPlayer = null;
+  let gameOver = false;
+  let players = [];
+  let currentPlayer;
+
+  function startNewGame() {
+    players = [playerFactory('X', 'Player'), playerFactory('O', 'Computer')];
+    currentPlayer = players[0];
+  }
+
+  function toggleCurrentPlayer() {
+    if (currentPlayer === players[0]) {
+      currentPlayer = players[1];
+    } else {
+      currentPlayer = players[0];
+    }
+  }
+
+  function getCurrentPlayerPiece() {
+    return currentPlayer.piece;
+  }
+
+  function checkIfPlayerWon(playerPiece) {
+    const gameBoardState = gameBoard.getState();
+
+    for (let i = 0; i < gameBoardState.length; i++) {
+      let row = gameBoardState[i];
+      let column = gameBoardState.map((row) => row[i]);
+      // row checks
+      if (row.every((val) => val === playerPiece)) {
+        console.log(`row #${i} check is met`);
+        gameOver = true;
+        return;
+      }
+      // column checks
+      if (column.every((val) => val === playerPiece)) {
+        console.log(`col #${i} check is met`);
+        gameOver = true;
+        return;
       }
     }
-    // column checks
-
     // diagonal checks
+    if (
+      gameBoardState[0][0] === playerPiece &&
+      gameBoardState[1][1] === playerPiece &&
+      gameBoardState[2][2] === playerPiece
+    ) {
+      console.log(`top-left bottom-right diagonal check is met`);
+      gameOver = true;
+      return;
+    }
+    if (
+      gameBoardState[2][0] === playerPiece &&
+      gameBoardState[1][1] === playerPiece &&
+      gameBoardState[0][2] === playerPiece
+    ) {
+      console.log(`top-left bottom-right diagonal check is met`);
+      gameOver = true;
+      return;
+    }
+  }
+
+  function checkIfGameEnded() {
+    for (const player of players) {
+      checkIfPlayerWon(player.piece);
+    }
   }
 
   return {
-    reset,
-    placePiece,
-  }
-})(innerBoardElem)
-// END GLOBAL STATE
+    startNewGame,
+    getCurrentPlayerPiece,
+    checkIfGameEnded,
+    toggleCurrentPlayer,
+  };
+})(gameBoard);
 
-// SET UP DOM
-// END SET UP DOM
+function playerFactory(piece, name) {
+  return { piece, name };
+}
 
-// DOM MANIPULATION FUNCTIONS
-// END DOM MANIPULATION FUNCTIONS
-
-;(function main() {})()
+(function main() {
+  innerBoardElem.onclick = (e) => {
+    if ([...e.target.classList].includes('inner-board')) return;
+    let square = e.target;
+    // place the piece
+    gameBoard.placePiece(
+      square.dataset.row,
+      square.dataset.col,
+      gameStateController.getCurrentPlayerPiece()
+    );
+    // check if game ended
+    gameStateController.checkIfGameEnded();
+    // pass the player turn
+    gameStateController.toggleCurrentPlayer();
+  };
+  gameStateController.startNewGame();
+})();

@@ -169,6 +169,11 @@ main {
   background-color: #666;
 }
 
+.inner-board div:hover {
+  cursor: pointer;
+  background-color: #555;
+}
+
 .x-piece {
   display: block;
   position: relative;
