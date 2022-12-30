@@ -1,4 +1,6 @@
 const innerBoardElem = document.querySelector('.inner-board');
+const gameOverMessageElem = document.querySelector('.game-message');
+const gameOutcomeMessage = document.querySelector('#game-outcome-message');
 
 const gameBoard = ((board) => {
   let state = [
@@ -76,10 +78,38 @@ const gameStateController = ((gameBoard) => {
   let gameOver = false;
   let players = [];
   let currentPlayer;
+  const player1WinMessage = 'Player 1 wins!';
+  const player2WinMessage = 'Player 2 wins!';
+  const drawMessage = 'Draw!';
+
+  function refreshGameOverMessageDisplay() {
+    gameOutcomeMessage.textContent = getGameOutcomeMessage();
+    if (gameOver) {
+      gameOverMessageElem.style.display = 'inline-block';
+    } else {
+      gameOverMessageElem.style.display = 'none';
+    }
+  }
+
+  function getGameOutcomeMessage() {
+    if (winningPlayer == players[0]) {
+      return player1WinMessage;
+    }
+    if (winningPlayer == players[1]) {
+      return player2WinMessage;
+    }
+    if (winningPlayer == null) {
+      return drawMessage;
+    }
+  }
 
   function startNewGame() {
+    winningPlayer = null;
+    gameOver = false;
     players = [playerFactory('X', 'Player'), playerFactory('O', 'Computer')];
     currentPlayer = players[0];
+    refreshGameOverMessageDisplay();
+    gameBoard.reset();
   }
 
   function toggleCurrentPlayer() {
@@ -90,52 +120,9 @@ const gameStateController = ((gameBoard) => {
     }
   }
 
-  function getCurrentPlayerPiece() {
-    return currentPlayer.piece;
-  }
-
   function checkIfPlayerWon(playerPiece) {
     const gameBoardState = gameBoard.getState();
 
-    for (let i = 0; i < gameBoardState.length; i++) {
-      let row = gameBoardState[i];
-      let column = gameBoardState.map((row) => row[i]);
-      // row checks
-      if (row.every((val) => val === playerPiece)) {
-        console.log(`row #${i} check is met`);
-        winningPlayer = currentPlayer;
-        gameOver = true;
-        return;
-      }
-      // column checks
-      if (column.every((val) => val === playerPiece)) {
-        console.log(`col #${i} check is met`);
-        winningPlayer = currentPlayer;
-        gameOver = true;
-        return;
-      }
-    }
-    // diagonal checks
-    if (
-      gameBoardState[0][0] === playerPiece &&
-      gameBoardState[1][1] === playerPiece &&
-      gameBoardState[2][2] === playerPiece
-    ) {
-      console.log(`top-left bottom-right diagonal check is met`);
-      winningPlayer = currentPlayer;
-      gameOver = true;
-      return;
-    }
-    if (
-      gameBoardState[2][0] === playerPiece &&
-      gameBoardState[1][1] === playerPiece &&
-      gameBoardState[0][2] === playerPiece
-    ) {
-      console.log(`top-left bottom-right diagonal check is met`);
-      winningPlayer = currentPlayer;
-      gameOver = true;
-      return;
-    }
     // game draw check
     if (
       gameBoardState[0][0] !== '' &&
@@ -150,6 +137,51 @@ const gameStateController = ((gameBoard) => {
     ) {
       winningPlayer = null;
       gameOver = true;
+      refreshGameOverMessageDisplay();
+      return;
+    }
+
+    for (let i = 0; i < gameBoardState.length; i++) {
+      let row = gameBoardState[i];
+      let column = gameBoardState.map((row) => row[i]);
+      // row checks
+      if (row.every((val) => val === playerPiece)) {
+        console.log(`row #${i} check is met`);
+        winningPlayer = currentPlayer;
+        gameOver = true;
+        refreshGameOverMessageDisplay();
+        return;
+      }
+      // column checks
+      if (column.every((val) => val === playerPiece)) {
+        console.log(`col #${i} check is met`);
+        winningPlayer = currentPlayer;
+        gameOver = true;
+        refreshGameOverMessageDisplay();
+        return;
+      }
+    }
+    // diagonal checks
+    if (
+      gameBoardState[0][0] === playerPiece &&
+      gameBoardState[1][1] === playerPiece &&
+      gameBoardState[2][2] === playerPiece
+    ) {
+      console.log(`top-left bottom-right diagonal check is met`);
+      winningPlayer = currentPlayer;
+      gameOver = true;
+      refreshGameOverMessageDisplay();
+      return;
+    }
+    if (
+      gameBoardState[2][0] === playerPiece &&
+      gameBoardState[1][1] === playerPiece &&
+      gameBoardState[0][2] === playerPiece
+    ) {
+      console.log(`top-left bottom-right diagonal check is met`);
+      winningPlayer = currentPlayer;
+      gameOver = true;
+      refreshGameOverMessageDisplay();
       return;
     }
   }
@@ -162,9 +194,17 @@ const gameStateController = ((gameBoard) => {
 
   return {
     startNewGame,
-    getCurrentPlayerPiece,
     checkIfGameEnded,
     toggleCurrentPlayer,
+    get winningPlayer() {
+      return { ...winningPlayer };
+    },
+    get currentPlayerPiece() {
+      return currentPlayer.piece;
+    },
+    get gameOver() {
+      return gameOver;
+    },
   };
 })(gameBoard);
 
@@ -174,13 +214,14 @@ function playerFactory(piece, name) {
 
 (function main() {
   innerBoardElem.onclick = (e) => {
+    if (gameStateController.gameOver) return;
     if ([...e.target.classList].includes('inner-board')) return;
     let square = e.target;
     // place the piece
     const pieceWasPlaced = gameBoard.placePiece(
       square.dataset.row,
       square.dataset.col,
-      gameStateController.getCurrentPlayerPiece()
+      gameStateController.currentPlayerPiece
     );
     if (pieceWasPlaced) {
       // check if game ended
@@ -189,5 +230,10 @@ function playerFactory(piece, name) {
       gameStateController.toggleCurrentPlayer();
     }
   };
+  gameOverMessageElem.onclick = () => {
+    gameStateController.startNewGame();
+    gameOutcomeMessage.textContent = '';
+  };
+
   gameStateController.startNewGame();
 })();

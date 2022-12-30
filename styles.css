@@ -128,21 +128,23 @@ nav > * {
 
 /* MAIN */
 main {
-  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 
   width: 100%;
-  padding: 1rem;
+  height: 100%;
+  padding: auto;
 }
 /* END MAIN */
 
 /* GAME BOARD */
 .game-board {
+  display: inline-block;
   justify-content: center;
   align-items: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  overflow: hidden;
 
   width: 400px;
   height: 400px;
@@ -219,7 +221,29 @@ main {
 
   width: 90px;
   height: 90px;
-  border: solid 20px #222;
+  border: solid 20px #ffaa00;
   border-radius: 50%;
 }
 /* END GAME BOARD */
+
+/* MESSAGE */
+.game-message {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+
+  width: 400px;
+  height: 400px;
+}
+
+.game-message > h2 {
+  text-align: center;
+}
+
+.game-message > button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* END MESSAGE */
