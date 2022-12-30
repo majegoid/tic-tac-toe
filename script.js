@@ -136,6 +136,22 @@ const gameStateController = ((gameBoard) => {
       gameOver = true;
       return;
     }
+    // game draw check
+    if (
+      gameBoardState[0][0] !== '' &&
+      gameBoardState[0][1] !== '' &&
+      gameBoardState[0][2] !== '' &&
+      gameBoardState[1][0] !== '' &&
+      gameBoardState[1][1] !== '' &&
+      gameBoardState[1][2] !== '' &&
+      gameBoardState[2][0] !== '' &&
+      gameBoardState[2][1] !== '' &&
+      gameBoardState[2][2] !== ''
+    ) {
+      winningPlayer = null;
+      gameOver = true;
+      return;
+    }
   }
 
   function checkIfGameEnded() {
