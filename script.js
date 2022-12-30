@@ -21,6 +21,7 @@ const gameBoard = ((board) => {
 
   // place a piece
   function placePiece(row, col, piece) {
+    let piecePlaced = false;
     if (
       typeof +row === 'number' &&
       !Number.isNaN(+row) &&
@@ -29,9 +30,11 @@ const gameBoard = ((board) => {
     ) {
       if (state[row][col] !== 'X' && state[row][col] !== 'O') {
         state[row][col] = piece;
+        piecePlaced = true;
       }
     }
     refreshDisplay();
+    return piecePlaced;
   }
 
   // display the board based on the state
@@ -158,15 +161,17 @@ function playerFactory(piece, name) {
     if ([...e.target.classList].includes('inner-board')) return;
     let square = e.target;
     // place the piece
-    gameBoard.placePiece(
+    const pieceWasPlaced = gameBoard.placePiece(
       square.dataset.row,
       square.dataset.col,
       gameStateController.getCurrentPlayerPiece()
     );
-    // check if game ended
-    gameStateController.checkIfGameEnded();
-    // pass the player turn
-    gameStateController.toggleCurrentPlayer();
+    if (pieceWasPlaced) {
+      // check if game ended
+      gameStateController.checkIfGameEnded();
+      // pass the player turn
+      gameStateController.toggleCurrentPlayer();
+    }
   };
   gameStateController.startNewGame();
 })();
